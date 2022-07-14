@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from unicodedata import category
 
 __author__ = "bibow"
 
@@ -37,7 +36,7 @@ class ShopifyConnectorTest(unittest.TestCase):
     def tearDown(self):
         logger.info("Destory ShopifyConnectorTest ...")
 
-    @unittest.skip("demonstrating skipping")
+    # @unittest.skip("demonstrating skipping")
     def test_insert_update_product(self):
         dynamodb = boto3.resource(
             "dynamodb",
@@ -97,6 +96,7 @@ class ShopifyConnectorTest(unittest.TestCase):
             #             "body_html": item["data"]["description"],
             #             "vendor": item["data"]["factory_code"],
             #             "tags": tags,
+            #             "published_scope": "global"
             #         },
             #     }
             #     logger.info(product)
@@ -121,18 +121,19 @@ class ShopifyConnectorTest(unittest.TestCase):
                 }
                 logger.info(variant)
                 self.shopify_connector.insert_update_variant(variant)
-                break
+                # break
 
-    # @unittest.skip("demonstrating skipping")
+    @unittest.skip("demonstrating skipping")
     def test_get_products(self):
-        products = shopify.Product.find(
-            # handle="aloe-barbadensis-powder-by-s-a-herbal-bioactives-llp"
-            handle="93510-angel-11426"
-        )
-        for product in products:
-            logger.info(product.attributes)
-            for option in product.options:
-                logger.info(option.attributes)
+        # products = shopify.Product.find(
+        #     # handle="aloe-barbadensis-powder-by-s-a-herbal-bioactives-llp"
+        #     handle="93510-angel-11426"
+        #     # handle="10002-yumfun-10763"
+        # )
+        # for product in products:
+        #     logger.info(product.attributes)
+        #     for option in product.options:
+        #         logger.info(option.attributes)
 
         # products = shopify.Product.find(
         #     # handle="aloe-barbadensis-powder-by-s-a-herbal-bioactives-llp"
@@ -141,6 +142,29 @@ class ShopifyConnectorTest(unittest.TestCase):
         # variants = shopify.Variant.find(product_id=products[0].id)
         # for variant in variants:
         #     logger.info(variant.attributes)
+
+        # results = shopify.GraphQL().execute(
+        #     "{ channels(first: 10) { edges { node { id name } } } }"
+        # )
+        # results = shopify.GraphQL().execute(
+        #     "{ publications(first: 10) { edges { node { id name } } } }"
+        # )
+
+        results = shopify.GraphQL().execute(
+            query="""mutation publishablePublishToCurrentChannel($id: ID!) {
+                    publishablePublishToCurrentChannel(id: $id) {
+                        userErrors {
+                            field
+                            message
+                        }
+                    }
+                }
+                """,
+            variables={
+                "id": "gid://shopify/Product/7433043214495"
+            },
+        )
+        logger.info(Utility.json_dumps(Utility.json_loads(results)))
 
 
 if __name__ == "__main__":

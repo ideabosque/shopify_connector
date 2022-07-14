@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from asyncio import Handle
-from numpy import var
 
 __author__ = "bibow"
 
@@ -42,15 +40,39 @@ class ShopifyConnector(object):
         _product.attributes = dict(_product.attributes, **product["data"])
         success = _product.save()
         if success:
+            results = Utility.json_loads(
+                shopify.GraphQL().execute(
+                    query="""mutation publishablePublishToCurrentChannel($id: ID!) {
+                                publishablePublishToCurrentChannel(id: $id) {
+                                    userErrors {
+                                        field
+                                        message
+                                    }
+                                }
+                            }
+                            """,
+                    variables={"id": f"gid://shopify/Product/{_product.id}"},
+                )
+            )
+            if (
+                len(results["data"]["publishablePublishToCurrentChannel"]["userErrors"])
+                > 0
+            ):
+                raise Exception(
+                    results["data"]["publishablePublishToCurrentChannel"]["userErrors"][
+                        0
+                    ]["message"]
+                )
             return
         raise Exception(_product.errors.full_messages())
 
     def insert_update_variant(self, variant):
         _products = shopify.Product.find(handle=variant["handle"])
         if len(_products) == 0:
-            raise Exception(
-                f"Cannot find the product with the sku ({variant['handle']})."
-            )
+            # raise Exception(
+            #     f"Cannot find the product with the sku ({variant['handle']})."
+            # )
+            return
 
         options = []
         product_options = [
