@@ -36,7 +36,7 @@ class ShopifyConnectorTest(unittest.TestCase):
     def tearDown(self):
         logger.info("Destory ShopifyConnectorTest ...")
 
-    # @unittest.skip("demonstrating skipping")
+    @unittest.skip("demonstrating skipping")
     def test_insert_update_product(self):
         dynamodb = boto3.resource(
             "dynamodb",
@@ -123,12 +123,10 @@ class ShopifyConnectorTest(unittest.TestCase):
                 self.shopify_connector.insert_update_variant(variant)
                 # break
 
-    @unittest.skip("demonstrating skipping")
+    # @unittest.skip("demonstrating skipping")
     def test_get_products(self):
         # products = shopify.Product.find(
-        #     # handle="aloe-barbadensis-powder-by-s-a-herbal-bioactives-llp"
-        #     handle="93510-angel-11426"
-        #     # handle="10002-yumfun-10763"
+        #     handle="1bolt-googpl2xl-blbk"
         # )
         # for product in products:
         #     logger.info(product.attributes)
@@ -143,6 +141,34 @@ class ShopifyConnectorTest(unittest.TestCase):
         # for variant in variants:
         #     logger.info(variant.attributes)
 
+        document = """
+            fragment ProductInfo on Product {
+                id
+                title
+                description
+                status
+                vendor
+                handle
+            }
+
+            query GetOneProduct($query: String!) {
+                products(first: 1, query: $query) {
+                    edges {
+                        node { 
+                            ...ProductInfo
+                        }
+                    } 
+                }
+            }
+        """
+        results = shopify.GraphQL().execute(
+            query=document,
+            variables={"query": "sku:mcc-gt-ghocas1017"},
+            operation_name="GetOneProduct",
+        )
+        # results = shopify.GraphQL().execute(
+        #     """{ products(first: 10, query: "sku:mcc-gt-ghocas1017") { edges { node { id title description status vendor handle } } } }"""
+        # )
         # results = shopify.GraphQL().execute(
         #     "{ channels(first: 10) { edges { node { id name } } } }"
         # )
@@ -150,20 +176,20 @@ class ShopifyConnectorTest(unittest.TestCase):
         #     "{ publications(first: 10) { edges { node { id name } } } }"
         # )
 
-        results = shopify.GraphQL().execute(
-            query="""mutation publishablePublishToCurrentChannel($id: ID!) {
-                    publishablePublishToCurrentChannel(id: $id) {
-                        userErrors {
-                            field
-                            message
-                        }
-                    }
-                }
-                """,
-            variables={
-                "id": "gid://shopify/Product/7433043214495"
-            },
-        )
+        # results = shopify.GraphQL().execute(
+        #     query="""mutation publishablePublishToCurrentChannel($id: ID!) {
+        #             publishablePublishToCurrentChannel(id: $id) {
+        #                 userErrors {
+        #                     field
+        #                     message
+        #                 }
+        #             }
+        #         }
+        #         """,
+        #     variables={
+        #         "id": "gid://shopify/Product/2114471919673"
+        #     },
+        # )
         logger.info(Utility.json_dumps(Utility.json_loads(results)))
 
 

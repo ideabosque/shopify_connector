@@ -5,6 +5,7 @@ from __future__ import print_function
 __author__ = "bibow"
 
 import shopify
+
 from silvaengine_utility import Utility
 
 
@@ -124,3 +125,54 @@ class ShopifyConnector(object):
         if success:
             return
         raise Exception(_products[0].errors.full_messages())
+
+    # Find a product by attributes.
+    def find_products_by_attributes(self, attributes):
+        if not attributes:
+            return None
+
+        try:
+            products = shopify.Product.find(**attributes)
+            return products if products else None
+        except Exception as e:
+            self.logger.error(f"Error finding products: {str(e)}")
+            return None
+
+    def create_draft_order(self, customer, line_items, shipping_address={}):
+        # Create new draft order
+        draft_order = shopify.DraftOrder()
+
+        # Set customer details
+        draft_order.customer = customer
+
+        # Add line items
+        draft_order.line_items = line_items
+
+        # Add shipping address if provided
+        if shipping_address:
+            draft_order.shipping_address = shipping_address
+
+        # Save the draft order
+        if draft_order.save():
+            return draft_order.id
+        else:
+            raise Exception(draft_order.errors.full_messages())
+
+    def create_customer(self, first_name, last_name, email, phone, address):
+        # Create a new customer
+        customer = shopify.Customer()
+
+        # Set customer details (you can add more attributes like tags, marketing_opt_in, etc.)
+        customer.first_name = first_name
+        customer.last_name = last_name
+        customer.email = email
+        customer.phone = phone
+        customer.addresses = [address]
+
+        # Save the customer
+        if customer.save():
+            self.logger.info(f"Customer created successfully! ID: {customer.id}")
+            return customer
+        else:
+            self.logger.info("Failed to create customer.")
+            return None
