@@ -158,6 +158,17 @@ class ShopifyConnector(object):
         else:
             raise Exception(draft_order.errors.full_messages())
 
+    def find_customer_by_email(self, email):
+        customers = shopify.Customer.find(email=email)
+        if customers:
+            for customer in customers:
+                self.logger.info(
+                    f"Customer Found: {customer.first_name} {customer.last_name} (Email: {customer.email})"
+                )
+            return customers
+        else:
+            self.logger.info("Customer not found.")
+
     def create_customer(self, first_name, last_name, email, phone, address):
         # Create a new customer
         customer = shopify.Customer()
