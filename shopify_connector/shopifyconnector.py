@@ -168,7 +168,6 @@ class ShopifyConnector(object):
             return customers
         else:
             self.logger.info("Customer not found.")
-
     def create_customer(self, first_name, last_name, email, phone, address):
         # Create a new customer
         customer = shopify.Customer()
@@ -185,5 +184,5 @@ class ShopifyConnector(object):
             self.logger.info(f"Customer created successfully! ID: {customer.id}")
             return customer
         else:
-            self.logger.info("Failed to create customer.")
+            self.logger.error(f"Failed to create customer: {customer.errors.full_messages()}")
             return None

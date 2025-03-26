@@ -123,7 +123,7 @@ class ShopifyConnectorTest(unittest.TestCase):
                 self.shopify_connector.insert_update_variant(variant)
                 # break
 
-    # @unittest.skip("demonstrating skipping")
+    @unittest.skip("demonstrating skipping")
     def test_get_products(self):
         # products = shopify.Product.find(
         #     handle="1bolt-googpl2xl-blbk"
@@ -192,6 +192,81 @@ class ShopifyConnectorTest(unittest.TestCase):
         # )
         logger.info(Utility.json_dumps(Utility.json_loads(results)))
 
+    @unittest.skip("demonstrating skipping")
+    def test_create_customer(self):
+        customer_data = {
+            "email": "azrael_wang@aliyun.com",
+            "first_name": "Jeffrey",
+            "last_name": "Wang",
+            "phone": "212-456-7890",
+            "address": {
+                "address1": "123 Main St",
+                "address2": "",
+                "city": "Irvine",
+                "province_code": "CA",
+                "province": "California",
+                "zip": "96218",
+                "country": "United States",
+                "country_code": "US",
+                "company": "Idea Bosque",
+                "first_name": "Jeffrey",
+                "last_name": "Wang",
+                "phone": "212-456-7890",
+            }
+        }
+        customer = self.shopify_connector.create_customer(**customer_data)
+        logger.info(customer)
+    
+    @unittest.skip("demonstrating skipping")
+    def test_find_customer_by_email(self):
+        result = self.shopify_connector.find_customer_by_email("azrael_wang@aliyun.com")
+        print(result[0])
+        print(result[0].first_name)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_find_products_by_attributes(self):
+        attributes = {
+            # "created_at_max": "2025-03-26T16:15:47-04:00",
+            # "created_at_min": "2025-02-25T16:15:47-04:00",
+            # "fields": "handle,id,image,options,product_type",
+            "limit": 50,
+            # "handle": "1bolt-googpl2xl-blbk",
+            # "title": "Classic Bag Mitts",
+            "product_type": "Boxing",
+            "status": "active"
+        }
+        result = self.shopify_connector.find_products_by_attributes(attributes)
+        print(result)
+        for product in result:
+            print(product.id)
+            print(product.title)
+            print(product.handle)
+            print(product.product_type)
+            print(product.status)
+
+    @unittest.skip("demonstrating skipping")
+    def test_create_draft_order(self):
+        line_items = [{
+            "quantity": 1,
+            "variant_id": 44379840348217
+        }]
+        shipping_address = {
+            "address1": "123 Main St",
+            "address2": "",
+            "city": "Irvine",
+            "province_code": "CA",
+            "zip": "96218",
+            "country_code": "US",
+            "company": "Idea Bosque",
+            "first_name": "Jeffrey",
+            "last_name": "Wang",
+            "phone": "212-456-7890",
+        }
+        email = "azrael_wang@aliyun.com"
+        customers = self.shopify_connector.find_customer_by_email("azrael_wang@aliyun.com")
+        customer = {"id": customers[0].id}
+        result = self.shopify_connector.create_draft_order(customer=customer, line_items=line_items, shipping_address=shipping_address)
+        print(result)
 
 if __name__ == "__main__":
     unittest.main()
