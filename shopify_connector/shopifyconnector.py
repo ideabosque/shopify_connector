@@ -138,12 +138,12 @@ class ShopifyConnector(object):
             self.logger.error(f"Error finding products: {str(e)}")
             return None
 
-    def create_draft_order(self, customer, line_items, shipping_address={}):
+    def create_draft_order(self, email, line_items, shipping_address={}, billing_address={}):
         # Create new draft order
         draft_order = shopify.DraftOrder()
 
         # Set customer details
-        draft_order.customer = customer
+        draft_order.email = email
 
         # Add line items
         draft_order.line_items = line_items
@@ -151,6 +151,10 @@ class ShopifyConnector(object):
         # Add shipping address if provided
         if shipping_address:
             draft_order.shipping_address = shipping_address
+
+
+        if billing_address:
+            draft_order.billing_address = billing_address
 
         # Save the draft order
         if draft_order.save():
